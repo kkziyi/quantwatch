@@ -1,0 +1,93 @@
+# ============================================================
+# QuantWatch 配置文件（非敏感配置，可 git 跟踪）
+# ============================================================
+
+# ── 通用 ────────────────────────────────────────────────────
+check_interval: 300
+
+# ── 股票池 ─────────────────────────────────────────────────
+stocks:
+  "600176": { name: "中国巨石", alert_threshold: 0.03 }
+  "600875": { name: "东方电气", alert_threshold: 0.03 }
+  "603308": { name: "应流股份", alert_threshold: 0.03 }
+  "000636": { name: "风华高科", alert_threshold: 0.03 }
+  "002353": { name: "杰瑞股份", alert_threshold: 0.03 }
+
+# ── 策略配置 ───────────────────────────────────────────────
+strategies:
+  price_alert:
+    enabled: true
+    alert_threshold: 0.03
+
+  # Phase 2a 策略参数模板（后续任务会实现，先留结构）
+  volume_alert:
+    enabled: true
+    multiplier: 2.0
+    lookback_days: 20
+    baseline_method: "median"
+    method: "static"
+    intraday_comparison: "proportional"
+
+  turnover_alert:
+    enabled: true
+    method: "zscore"
+    zscore_threshold: 2.0
+    lookback_days: 60
+    cap_group:
+      large: 0.03
+      mid: 0.05
+      small: 0.08
+      micro: 0.15
+    rate_change:
+      enabled: true
+      lookback: 5
+      threshold: 2.0
+
+  macd_signal:
+    enabled: true
+    fast: 12
+    slow: 26
+    signal: 9
+    distinguish_zero_cross: true
+    diff_gap_method: "ratio"
+    diff_gap_ratio: 0.005
+    diff_gap_min: 0.03
+
+  rsi_signal:
+    enabled: true
+    period: 14
+    overbought: 70
+    oversold: 30
+    extreme_overbought: 85
+    extreme_oversold: 15
+
+  kdj_signal:
+    enabled: true
+    n: 9
+    k: 3
+    d: 3
+    overbought: 80
+    oversold: 20
+    diff_gap_min: 1.5
+
+# ── 通知渠道 ───────────────────────────────────────────────
+notifiers:
+  feishu: { enabled: true }
+  email: { enabled: false }
+  wechat: { enabled: false }
+  telegram: { enabled: false }
+
+# ── 交易时间 ───────────────────────────────────────────────
+trading:
+  start: "09:25"
+  end: "15:05"
+
+# ── AKShare ────────────────────────────────────────────────
+akshare:
+  delay: 1.0
+
+# ── 日志 ───────────────────────────────────────────────────
+logging:
+  file: "logs/quantwatch.log"
+  format: "%(asctime)s | %(levelname)-5s | %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"

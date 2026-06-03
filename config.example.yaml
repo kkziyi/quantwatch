@@ -1,0 +1,83 @@
+# ============================================================
+# QuantWatch 配置文件模板（可 git 跟踪）
+# 复制为 config.yaml 后修改实际值即可使用
+# ============================================================
+
+# ── 通用 ────────────────────────────────────────────────────
+# 盘中轮询间隔（秒），建议 ≥ 60 避免 API 限流
+check_interval: 300
+
+# ── 股票池 ─────────────────────────────────────────────────
+# key: A股代码（6位字符串）, name: 股票名称, alert_threshold: 异动阈值（小数）
+stocks:
+  "600176": { name: "中国巨石", alert_threshold: 0.03 }
+  "600875": { name: "东方电气", alert_threshold: 0.03 }
+  "603308": { name: "应流股份", alert_threshold: 0.03 }
+  "000636": { name: "风华高科", alert_threshold: 0.03 }
+  "002353": { name: "杰瑞股份", alert_threshold: 0.03 }
+
+# ── 策略配置 ───────────────────────────────────────────────
+strategies:
+  # ── 价格异动（Phase 1，已实现） ──
+  price_alert:
+    enabled: true
+    alert_threshold: 0.03     # ±3% 触发预警
+
+  # ── 以下为 Phase 2a 策略参数模板（后续任务实现） ──
+
+  # 成交量异动
+  volume_alert:
+    enabled: false
+    multiplier: 2.0            # 当日量为均值的 N 倍触发
+    lookback_days: 20
+    baseline_method: "median"  # "median" 或 "mean"
+
+  # 换手率异动
+  turnover_alert:
+    enabled: false
+    method: "zscore"           # "zscore" 或 "rank"
+    zscore_threshold: 2.0
+    lookback_days: 60
+    cap_group:                 # 按市值分组的阈值
+      large: 0.03              # 大盘股 >3% 触发
+      mid: 0.05                # 中盘股 >5% 触发
+      small: 0.08              # 小盘股 >8% 触发
+      micro: 0.15              # 微盘股 >15% 触发
+    rate_change:               # 换手率变化率检测
+      enabled: true
+      lookback: 5
+      threshold: 2.0
+
+  # MACD 信号
+  macd_signal:
+    enabled: false
+    fast: 12
+    slow: 26
+    signal: 9
+    distinguish_zero_cross: true  # 区分水上/水下金叉死叉
+    diff_gap_method: "ratio"
+    diff_gap_ratio: 0.005
+    diff_gap_min: 0.03
+
+# ── 通知渠道 ───────────────────────────────────────────────
+# 具体凭证在 .env 文件中配置
+notifiers:
+  feishu: { enabled: true }
+  email: { enabled: false }
+  wechat: { enabled: false }
+  telegram: { enabled: false }
+
+# ── 交易时间 ───────────────────────────────────────────────
+trading:
+  start: "09:25"    # 早盘开始（含集合竞价确认）
+  end: "15:05"      # 收盘后5分钟缓冲
+
+# ── AKShare 数据源 ─────────────────────────────────────────
+akshare:
+  delay: 1.0         # 请求间隔（秒），避免限流
+
+# ── 日志 ───────────────────────────────────────────────────
+logging:
+  file: "logs/quantwatch.log"
+  format: "%(asctime)s | %(levelname)-5s | %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
